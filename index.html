@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyPlanner Typing Test - Practice for DSSSB LDC/JSA Skill Test</title>
+    
+    <!-- StudyPlanner Original Resources -->
+    <link rel="icon" href="./assets/images/favicon.webp">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/custom.css">
+    <link rel="stylesheet" href="./assets/css/fontawesome.min.css">
+
+    <style>
+        /* Force light mode for exam interface */
+        html { color-scheme: light; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-body, #f9fafb);
+            min-height: 100vh;
+        }
+        
+        .exam-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== EXAM HEADER ===== */
+        .exam-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+            border-radius: 16px;
+            padding: 28px 32px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 24px rgba(79,70,229,0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .exam-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .exam-header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; position: relative; }
+        .exam-header p { font-size: 14px; opacity: 0.9; margin-top: 4px; position: relative; }
+        .exam-badges { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; position: relative; }
+        .exam-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            background: rgba(255,255,255,0.18); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ===== TEST SELECTION ===== */
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .test-card {
+            background: white;
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .test-card:hover {
+            border-color: #818cf8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79,70,229,0.12);
+        }
+        .test-card.active {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        .test-card .test-name { font-weight: 700; font-size: 15px; color: #1e293b; }
+        .test-card .test-meta { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+        .test-card .test-meta span {
+            font-size: 11px; padding: 2px 10px; border-radius: 10px;
+            font-weight: 600;
+        }
+        .tag-english { background: #dbeafe; color: #1d4ed8; }
+        .tag-hindi { background: #fef3c7; color: #d97706; }
+        .tag-easy { background: #dcfce7; color: #16a34a; }
+        .tag-moderate { background: #fef3c7; color: #d97706; }
+        .tag-hard { background: #fee2e2; color: #dc2626; }
+        .tag-free { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; }
+
+        /* ===== LANGUAGE TOGGLE ===== */
+        .lang-toggle-wrap {
+            display: flex; gap: 8px; margin-bottom: 16px;
+        }
+        .lang-btn {
+            padding: 8px 24px; border: 2px solid #e5e7eb; border-radius: 10px;
+            font-weight: 600; font-size: 14px; cursor: pointer;
+            transition: all 0.2s; background: white; color: #6b7280;
+        }
+        .lang-btn.active { border-color: #4f46e5; background: #eef2ff; color: #4f46e5; }
+        .lang-btn:hover:not(.active) { border-color: #a5b4fc; }
+
+        /* ===== STATS PANEL ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 14px 12px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border: 1px solid #f3f4f6;
+        }
+        .stat-card .num { font-size: 28px; font-weight: 800; color: #1e293b; line-height: 1.2; }
+        .stat-card .lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-top: 2px; }
+        .stat-card.timer .num { color: #d97706; }
+        .stat-card.wpm .num { color: #059669; }
+        .stat-card.acc .num { color: #2563eb; }
+        .stat-card.err .num { color: #dc2626; }
+
+        /* ===== PASSAGE ===== */
+        .passage-area {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 2px solid #e5e7eb;
+            margin-bottom: 12px;
+        }
+        .passage-area .label-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+            font-size: 12px; font-weight: 600; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .passage-text {
+            max-height: 260px; overflow-y: auto;
+            font-size: 18px; line-height: 2.1;
+            user-select: none;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            padding: 4px;
+        }
+        .passage-text::-webkit-scrollbar { width: 5px; }
+        .passage-text::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .passage-text::-webkit-scrollbar-track { background: transparent; }
+        
+        .passage-text .word {
+            display: inline-block; padding: 1px 1px; margin: 0 1px;
+            border-radius: 3px; transition: all 0.08s;
+            border-bottom: 2px solid transparent;
+        }
+        .passage-text .word.untyped { color: #475569; }
+        .passage-text .word.correct { color: #16a34a; background: #f0fdf4; }
+        .passage-text .word.incorrect { color: #dc2626; background: #fef2f2; text-decoration: line-through; }
+        .passage-text .word.current {
+            background: #dbeafe; border-bottom: 3px solid #3b82f6;
+            padding: 1px 3px; border-radius: 4px;
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse { 0%,100% { border-bottom-color: #3b82f6; } 50% { border-bottom-color: #93c5fd; } }
+
+        /* ===== INPUT ===== */
+        .input-section {
+            background: white;
+            border-radius: 14px;
+            padding: 16px 20px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 12px;
+            border: 1px solid #f3f4f6;
+        }
+        .input-section label {
+            font-size: 12px; font-weight: 600; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: block; margin-bottom: 8px;
+        }
+        .input-section textarea {
+            width: 100%; min-height: 110px;
+            border: 2px solid #e5e7eb; border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 18px; line-height: 1.9;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            resize: none; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-weight: 400 !important;
+        }
+        .input-section textarea:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,0.12); }
+        .input-section textarea:disabled { background: #f9fafb; cursor: not-allowed; border-color: #e5e7eb; }
+
+        /* ===== PROGRESS ===== */
+        .progress-track {
+            background: #e5e7eb; border-radius: 20px; height: 6px;
+            margin-bottom: 14px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 20px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transition: width 0.3s; width: 0%;
+        }
+
+        /* ===== CONTROLS ===== */
+        .action-bar {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+        }
+        .action-bar button {
+            padding: 11px 28px; border: none; border-radius: 10px;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .action-bar button:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .btn-go { background: #059669; color: white; box-shadow: 0 4px 12px rgba(5,150,105,0.25); }
+        .btn-go:hover:not(:disabled) { background: #047857; transform: translateY(-1px); }
+        .btn-sub { background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.25); }
+        .btn-sub:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); }
+        .btn-res { background: #6b7280; color: white; }
+        .btn-res:hover:not(:disabled) { background: #4b5563; }
+
+        /* ===== ERRORS ===== */
+        .error-box {
+            display: none; margin-top: 12px; padding: 16px; border-radius: 10px;
+            font-size: 13px; line-height: 1.9; max-height: 220px; overflow-y: auto;
+        }
+        .error-box.show { display: block; }
+        .error-box.has-err { background: #fef2f2; border: 1px solid #fecaca; }
+        .error-box.no-err { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .err-word { color: #dc2626; font-weight: 700; }
+        .exp-word { color: #16a34a; font-weight: 700; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+            z-index: 9999; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white; border-radius: 20px; padding: 36px;
+            max-width: 540px; width: 100%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            animation: fadeUp 0.3s ease-out;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-box h2 { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 24px; }
+        .modal-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px;
+        }
+        .modal-item {
+            background: #f8fafc; padding: 18px; border-radius: 12px; text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .modal-item .lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .modal-item .val { font-size: 32px; font-weight: 800; color: #1e293b; line-height: 1.2; }
+        .modal-item .val.green { color: #059669; }
+        .modal-item .val.red { color: #dc2626; }
+        .modal-item .val.amber { color: #d97706; }
+        .modal-item .sub { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .modal-actions button {
+            padding: 12px 32px; border: none; border-radius: 10px;
+            font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-close-modal { background: #f3f4f6; color: #374151; }
+        .btn-close-modal:hover { background: #e5e7eb; }
+
+        /* ===== TEST LIST PAGE STYLING ===== */
+        .page-title { font-size: 28px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        .page-subtitle { color: #6b7280; margin-bottom: 20px; }
+
+        @media (max-width: 640px) {
+            .exam-header { padding: 20px; }
+            .exam-header h1 { font-size: 18px; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .stat-card { padding: 10px 8px; }
+            .stat-card .num { font-size: 22px; }
+            .test-grid { grid-template-columns: 1fr; }
+            .passage-text { font-size: 16px; }
+            .input-section textarea { font-size: 16px; }
+            .modal-grid { grid-template-columns: 1fr; }
+            .modal-box { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-wrapper" id="app">
+        <!-- ===== HEADER ===== -->
+        <div class="exam-header">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+                <div>
+                    <h1><i class="fas fa-keyboard mr-2"></i> StudyPlanner Typing Practice</h1>
+                    <p>Practice for DSSSB Junior Secretariat Assistant (JSA/LDC) Skill Test — Real Exam Interface</p>
+                </div>
+                <img src="./assets/images/logo.webp" alt="StudyPlanner" style="height:36px;opacity:0.9;">
+            </div>
+            <div class="exam-badges">
+                <span class="exam-badge"><i class="fas fa-graduation-cap"></i> DSSSB JSA</span>
+                <span class="exam-badge"><i class="fas fa-desktop"></i> Screen Mode</span>
+                <span class="exam-badge"><i class="fas fa-ban"></i> No Paste</span>
+                <span class="exam-badge"><i class="fas fa-clock"></i> 10 Mins</span>
+            </div>
+        </div>
+
+        <!-- ===== TEST SELECTION ===== -->
+        <div id="testListView">
+            <h2 class="page-title"><i class="fas fa-list mr-2 text-indigo-600"></i> Select a DSSSB Typing Test</h2>
+            <p class="page-subtitle">Choose from <span id="testCount"></span> DSSSB typing tests below</p>
+
+            <div class="lang-toggle-wrap">
+                <button class="lang-btn active" onclick="filterTests('all')"><i class="fas fa-globe mr-1"></i> All</button>
+                <button class="lang-btn" onclick="filterTests('english')"><i class="fas fa-font mr-1"></i> English</button>
+                <button class="lang-btn" onclick="filterTests('hindi')"><i class="fas fa-language mr-1"></i> हिन्दी</button>
+            </div>
+
+            <div class="test-grid" id="testGrid"></div>
+        </div>
+
+        <!-- ===== TYPING INTERFACE ===== -->
+        <div id="typingView" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+                <button onclick="backToList()" style="padding:8px 18px;border:2px solid #e5e7eb;border-radius:10px;background:white;font-weight:600;cursor:pointer;font-size:13px;">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to Tests
+                </button>
+                <span style="font-size:14px;font-weight:700;color:#4f46e5;" id="currentTestName"></span>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card timer">
+                    <div class="num" id="timerDisplay">10:00</div>
+                    <div class="lbl"><i class="far fa-clock mr-1"></i>Time Left</div>
+                </div>
+                <div class="stat-card wpm">
+                    <div class="num" id="wpmDisplay">0</div>
+                    <div class="lbl"><i class="fas fa-tachometer-alt mr-1"></i>Net WPM</div>
+                </div>
+                <div class="stat-card acc">
+                    <div class="num" id="accuracyDisplay">100<small style="font-size:16px;">%</small></div>
+                    <div class="lbl"><i class="fas fa-bullseye mr-1"></i>Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num"><span id="typedCount">0</span><small style="font-size:16px;">/<span id="totalWords">0</span></small></div>
+                    <div class="lbl"><i class="fas fa-edit mr-1"></i>Words</div>
+                </div>
+                <div class="stat-card err">
+                    <div class="num" id="errorCount">0</div>
+                    <div class="lbl"><i class="fas fa-times-circle mr-1"></i>Mistakes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="charCount">0</div>
+                    <div class="lbl"><i class="fas fa-keyboard mr-1"></i>Keys</div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+
+            <!-- Passage -->
+            <div class="passage-area">
+                <div class="label-row">
+                    <span><i class="fas fa-file-alt mr-1"></i> Typing Passage</span>
+                    <span id="passageWordCount"></span>
+                </div>
+                <div class="passage-text" id="passageContent"></div>
+            </div>
+
+            <!-- Input -->
+            <div class="input-section">
+                <label><i class="fas fa-edit mr-1"></i> Type the passage here</label>
+                <textarea id="userInput" placeholder="Click 'Start Test' then begin typing..." disabled></textarea>
+            </div>
+
+            <!-- Controls -->
+            <div class="action-bar">
+                <button class="btn-go" id="startBtn" onclick="startTest()"><i class="fas fa-play"></i> Start Test</button>
+                <button class="btn-sub" id="submitBtn" onclick="submitTest()" disabled><i class="fas fa-check-circle"></i> Submit</button>
+                <button class="btn-res" onclick="resetTest()"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+
+            <!-- Error Summary -->
+            <div class="error-box" id="errorSummary"></div>
+        </div>
+    </div>
+
+    <!-- ===== RESULT MODAL ===== -->
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal-box">
+            <h2><i class="fas fa-trophy text-amber-500 mr-2"></i> Test Complete!</h2>
+            <div class="modal-grid">
+                <div class="modal-item"><div class="lbl">Net Speed</div><div class="val green" id="rWpm">0</div><div class="sub">wpm</div></div>
+                <div class="modal-item"><div class="lbl">Gross Speed</div><div class="val" id="rGross" style="color:#7c3aed;">0</div><div class="sub">wpm (gross)</div></div>
+                <div class="modal-item"><div class="lbl">Accuracy</div><div class="val green" id="rAcc">0%</div><div class="sub">correct</div></div>
+                <div class="modal-item"><div class="lbl">Words Typed</div><div class="val" id="rTyped">0</div><div class="sub">of <span id="rTotal">0</span></div></div>
+                <div class="modal-item"><div class="lbl">Time Taken</div><div class="val amber" id="rTime">0s</div><div class="sub">mm:ss</div></div>
+                <div class="modal-item"><div class="lbl">Errors</div><div class="val red" id="rErrors">0</div><div class="sub">incorrect words</div></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-close-modal" onclick="closeModal()">Close</button>
+                <button class="btn-close-modal" onclick="closeModal();backToList();" style="background:#4f46e5;color:white;">Try Another</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/js/test_logic.js"></script>
+    <script>
+    // ================================================================
+    // ALL DSSSB PASSAGES — Downloaded from studyplanner.com (Test IDs: 240 English, 221 Hindi)
+    // ================================================================
+    const ALL_TESTS = [
+    {
+        id: 221,
+        lang: 'hindi',
+        difficulty: 'moderate',
+        title: "StudyPlanner Hindi Typing Test 221",
+        passage: "पर्यावरण की रक्षा आज की दुनिया की सबसे बड़ी और अनिवार्य जरूरत बन गई है । हमारी धरती, हवा और पानी प्रदूषण के कारण तेजी से दूषित होते जा रहे हैं, जिससे मानव जीवन पर बड़ा खतरा मंडरा रहा है । यदि हम अभी नहीं संभले और कड़े कदम नहीं उठाए, तो आने वाली पीढ़ियों के लिए यह धरती रहने योग्य नहीं बचेगी । हमें अधिक से अधिक पेड़ लगाने चाहिए और वनों की अंधाधुंध कटाई को हर हाल में रोकना चाहिए । वायु प्रदूषण को कम करने के लिए हमें सौर ऊर्जा और इलेक्ट्रिक वाहनों जैसे स्वच्छ ऊर्जा के स्रोतों को अपनाना चाहिए । प्लास्टिक का उपयोग पूरी तरह बंद करना चाहिए क्योंकि यह मिट्टी को जहरीला बनाता है और सैकड़ों वर्षों तक नष्ट नहीं होता । वर्षा जल का संचयन करना चाहिए ताकि गिरते हुए भूजल स्तर को बचाया जा सके । कूड़े का सही निस्तारण और गीले-सूखे कचरे को अलग करना स्वच्छता की ओर एक बड़ा कदम है । पर्यावरण की सुरक्षा केवल सरकार का काम नहीं, बल्कि हर नागरिक की निजी जिम्मेदारी है । स्वच्छ और हरित पर्यावरण ही स्वस्थ जीवन की सबसे बड़ी गारंटी है । ग्लोबल वार्मिंग और जलवायु परिवर्तन जैसी समस्याओं का समाधान केवल प्रकृति के साथ तालमेल बिठाकर ही संभव है । हमें अपनी जीवनशैली को सरल और प्रकृति के अनुकूल बनाना होगा । \'पर्यावरण बचाओ, पृथ्वी बचाओ\' केवल एक नारा नहीं, बल्कि हमारे जीवन का उद्देश्य होना चाहिए । सौर ऊर्जा और जैविक खेती को बढ़ावा देना भविष्य की आवश्यकता है । हमें अपने बच्चों को पर्यावरण के प्रति जागरूक करना चाहिए । नदियों को प्रदूषित होने से बचाना ही जल संरक्षण है । ओजोन परत की रक्षा के लिए हमें हानिकारक गैसों का उत्सर्जन कम करना होगा । प्रकृति का सम्मान करना ही मानवता की रक्षा करना है । आइए, हम सब मिलकर इस धरती को फिर से हरा-भरा और रहने योग्य बनाने का दृढ़ संकल्प लें । ओजोन परत में होने वाला छेद और पिघलते ग्लेशियर"
+    },
+    {
+        id: 6415,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 200 (PYQ)",
+        passage: "The presidential address to Parliament on June 9, 2014 had focussed nearly exclusively on projects and schemes, eschewing policy. Therefore, many had eagerly awaited the budget speech for a policy vision of the new government. Unfortunately, it too left observers guessing on whether the government would tackle tough reforms or rely principally  on  better  implementation.  Had  this  been  the  budget  of  the  United Progressive Alliance (UPA), arguably it could have passed as spelling directional shift. But coming as it does from a government that has just scored an unprecedented victory on the platform of growth, development and jobs, it feels incremental. Such is the ambiguity of the message that the outgoing finance minister P Chidambaram has gone on to claim, unjustifiably in my view, that this is his interim budget without the humour  and  inspirational  quotes.  The  budget  surely  has  features  that  sharply distinguish it from the Chidambaram budget. It offers steps to minimise future tax disputes  and  surprises.  It  contains  credible  proposals  to  accelerate  building  of infrastructure.  It  promises  to  develop  entrepreneur-friendly  legal  bankruptcy framework for small and medium firms. It introduces several steps towards trade facilitation. And it even proposes to reform the Apprenticeship Act, thus touching on labour law reforms. This being said, it is inexplicable why finance minister Arun Jaitley stuck to Chidambaram\'s fiscal deficit target of 4.1% of GDP. One would have thought that a different and more realistic deficit target was the most obvious way for him to place his personal stamp on the budget. Even representatives of ratings agencies had accused Chidambaram of using overly optimistic assumptions to peg the deficit at this low level. Therefore, Jaitley had the necessary political and economic space to opt for a higher and more realistic deficit figure. Predictably, nearly all experts have said that they expect the deficit to be close to 4.5%. One can keep resorting to dodgy accounting to misrepresent the bottom line figure but that would not make credible the ambitious fiscal consolidation plan that Jaitley has proposed. Subsidies to the middle class are regressive and add to fiscal deficit. So it is further difficult to understand the finance minister\'s hesitation in tackling them. Back-of-the-envelope calculations show that cooking gas subsidy per beneficiary household is approximately the same as the average annual wage paid per beneficiary household. Mahatma Gandhi National Rural Employment Guarantee Act. Given that MGNREGA wage is a payment for labour performed and not outright transfer, cooking gas subsidy is not just absurd but socially repugnant. As with a higher fiscal deficit target, the government had enough political space to begin slashing the subsidy."
+    },
+    {
+        id: 6416,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 201 (PYQ)",
+        passage: "The India of naked, hungry, and homeless, teeming millions is all but gone. But India must promote the orderly development of its entire health system and address many of the challenges that it now faces. There are some interesting developments in progress within India. Extreme poverty is all but gone and by 2025 the prediction is that fewer than 1% of the population will be at that level of income. With the total fertility rate nearing replacement rate, population growth rate has slowed sharply and is expected to fall below 1% per annum by 2025, with several states already showing negative rates of growth. Total calorie consumption has fallen and there are now consistent food surpluses in the country. While each of these statistics is individually remarkable, taken together they paint a picture that is very different from the one that India woke up to on August 15, 1947. The India of naked, hungry, and homeless, teeming millions is all but gone forever, as are the fears of Professor Malthus, one of the earliest teachers of Indian civil servants at the East India Company College in Hertfordshire. As India looks ahead and prepares itself for the next decade, it will need to make room for this new India, and to think very differently than it has in the past. This new India faces some very different challenges. Very few people below the poverty line but close to 95% of the population being low-income, and not middle-class. Adequate total expenditure on health care by citizens but over 50 million people returning to poverty each year because of health shocks, having to once again claw their way back up. And, despite all this expenditure, a continuing burden of maternal and child mortality and infectious diseases alongside a rapidly rising burden of non-communicable diseases such as high blood pressure, diabetes, and mental illness which have a direct impact on the well-being and economic productivity of young Indians. Absolute hunger a distant memory for families but children with high levels of anaemia and malnutrition which hurts both their physical health and their mental abilities. To respond effectively to these new challenges, India may need to focus its attention and redirect its scarce tax resources towards building up its human capital and rely far more heavily on its well-functioning capital markets and private sector, to address the more traditional challenges of the lack of adequate capital and infrastructure and tools for risk management in the economy."
+    },
+    {
+        id: 6499,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 202",
+        passage: "The  80th  and  latest  round  of  the  household  social  consumption  health  survey conducted by the National Statistical Office is the first comprehensive survey of its kind in both the post pandemic era and the period in which the Ayushman Bharat Pradhan Mantri Jan Arogya Yojana PMJAY scheme attained maturity. The previous two surveys of the same kind revealed that most Indians did not have any form of health insurance. Since PMJAYs launch in 2018 the 80th round shows that insurance coverage has expanded around threefold accounting for an increasing share of health care financing in hospitals. However the hospitalisation rate has not recovered to the 2014 level meaning that having an insurance card still does not guarantee access to a bed and hidden costs continue to limit access. The reimbursement rates under PMJAY and State funded insurance schemes are often below market rates so private hospitals compensate by billing patients separately for diagnostics and ancillary services. In other words while state funded health insurance is subsidising private health care providers access to low income markets without also enforcing regulated prices the combined system provides a safety net where insurance covers hospitalisation and the public network has improved financial protection for households seeking primary care. Second the Proportion of Population Reported Ailing has doubled while infectious diseases have declined and non communicable diseases have increased. Economists have interpreted this as a sign of more people seeking care thus becoming visible to the health care sector. Previous surveys singled out out of pocket expenses OOPE on health care as a leading cause of poverty. In the 80th round while the mean OOPE has roughly doubled the median OOPE has dropped to 11285 per hospitalisation and at nearly nothing for public outpatient care. Health care expenses in India are a mix of many low cost consultations and a few significant and expensive interactions such as surgeries and chronic care. The two trends thus mean that while health care is becoming more affordable thanks to the public sector absorbing the cost"
+    },
+    {
+        id: 6500,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 203",
+        passage: "Traditionally in large parts of the country the April weather was a prelude to the scorching summer. However its increasingly becoming clear that extreme heat is no longer a May June phenomenon. According to the India Meteorological Department IMD at least 11 states are in the grip of a heat wave. Though temperatures are expected to fall next week the relief is likely to be temporary. The Centres decision to issue a heat advisory to states is therefore a much needed step. It has urged state governments  to  shift  work  hours  mandate  rest  breaks  and  ensure  cooling arrangements for workers exposed to the sun. Hospitals have been directed to set up dedicated heatstroke units stock oral rehydration solutions and train staff for rapid response. These advisories reflect some lessons learned from recent heat waves. But they are not enforceable. Much more needs to be done to protect the vulnerable from the elements. Most states in the country have heat action plans HAPs. They list standard procedures for  individual  departments  from  public  health  and  education  to  agriculture  and electricity. However implementation has been an Achilles heel of most HAPs. Chronic underfunding weak institutional capacity and poor interdepartmental coordination have limited their effectiveness. Heat stress is not classified as an emergency like floods earthquakes or cyclones in the countrys disaster management framework. Some states have categorised heat waves as a state specific disaster this allows them to use up to 10 per cent of their annual State Disaster Response Fund for relief. The  16th  Finance  Commission  which  submitted  its  report  earlier  this  year recommended that a heat wave be notified as a disaster at the national level as well. Such recognition will enable states to access central relief funds and institutionalise long term resilience building measures. More than half of Indias districts are prone to heat related stress according to a study conducted last year by the Centre for Energy Environment and Water. Urban areas face an additional challenge. Concrete and asphalt store vast amounts of heat during the day and release it at"
+    },
+    {
+        id: 6501,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 204",
+        passage: "The US Federal Reserves decision to keep interest rates unchanged in its April meeting was along expected lines. The conflict in West Asia the consequent dislocations in the energy market and supply chain disruptions have led to considerable macroeconomic uncertainty. While committee members have opted to wait in order to gauge the impact of these developments on inflation and growth what was noticeable was the growing disagreements over the direction of policy. The dissent one member preferred to lower interest rates while three others opposed the easing bias in the statement has been the greatest in recent years. This comes at a particularly challenging time for the Fed. The central bank is going through a leadership transition Jerome Powells term as Fed chair ends on May 15 and Kevin Warsh Trumps choice has been confirmed by a Senate banking committee. Under Powell the Fed confronted multiple shocks ranging from the Covid pandemic to the energy market disruptions following the Russia Ukraine conflict and the war in West Asia. During his term the central bank was criticised for being behind the curve and not raising rates fast enough to combat inflation following the pandemic. More recently Powell and the Fed have also faced a barrage of criticism from US President Donald Trump. In his second term Trump has been quite vocal in his criticism of the direction of monetary policy. His attempts to pressurise the Fed into lowering interest rates have raised apprehensions over the independence and autonomy of the central bank. It was only a few days ago that the US Justice Department dropped its investigation over the Feds building renovations an investigation Powell had framed in the context of the administrations threats and ongoing pressure. The leadership change at the Fed the full Senate vote will be held in May will be closely watched. Inflation in the US has edged upwards consumer prices rose 3.3 per cent in March amid the war in Iran. Gas prices are now at 4.3 up from 3.18 a year ago. But the demands to ease policy may well continue. The political context is unlikely to change. The challenge before the next"
+    },
+    {
+        id: 6502,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 205",
+        passage: "The United Arab Emirates UAE OPECs Organization of Petroleum Exporting Countries third largest producer is leaving the group tomorrow. For decades OPEC wasnt just another organization. It was one of the most powerful forces in the global economy controlling a large share of the worlds oil. In simple terms it regulated the global supply of oil to influence its price. So you can say its an oil cartel. Formed in 1960 by countries like Saudi Arabia Iran Iraq Kuwait and Venezuela it was built on a powerful idea. If oil producers acted together they could take control of pricing power back from Western oil companies. And it worked. The 1973 oil crisis showed just how much power it wielded. The world didnt just slow down. It stalled. Long lines at gas stations soaring inflation and a global recession all triggered by a coordinated decision to cut supply. And just when its influence seemed to fade OPEC found a way to extend it. Through OPEC+ it brought in major producers like Russia tightening its grip on global supply once again. The logic was simple. A handful of countries controlled a large share of the worlds oil. Acting together gave them pricing power. But that world has been quietly changing. To be fair the UAEs departure doesnt come as a surprise. Its just the loudest crack in a wall thats been fracturing for years. Lets start by talking about supply. The rise of US shale producers has rewritten the rulebook. Unlike traditional oil projects that take years and billions of dollars to develop shale can be produced quickly and scaled up or down with ease. When prices rise producers ramp up fast. When prices fall they pull back just as quickly. So every time OPEC tightens supply to push prices up American shale steps in and fills the gap. In oil markets its the marginal barrel the extra supply that sets prices. And OPEC no longer controls it. Then theres internal friction. OPEC was never a perfect alliance but it used to at least move in one direction. Today its a looser coalition of countries with conflicting interests. For example some members like Venezuela and Nigeria desperately need high oil prices to fund"
+    },
+    {
+        id: 6503,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 206",
+        passage: "Donald Trumps war on science has been vicious and hugely damaging but it is worth noting that he has lost some of its biggest battles. Last year Mr Trump demanded that US federal scientific and medical research funding be cut by about half. But the budget Congress passed in February actually delivered a slight increase in overall funding although  specific  Trump  targets  such  as  the  Centers  for  Disease  Control  and Prevention were cut. He also continues to chip away at science in other ways such as dismissing the board overseeing the National Science Foundation this week. Magas attacks on science have been nakedly political. Its defeats have been politics of a different sort showing that the bipartisan pro science consensus is still intact and for the moment has the power to hold in check Mr Trump. Scientists themselves appear to be waking up to the potential of such politics. The organisation  314  Action  which  supports  Democratic  scientists  running  for  office reported  that  more  than  700  candidates  vying  for  local  congressional  and gubernatorial positions have sought its support ahead of the midterm elections this year three times the usual number. Many gave the White Houses war on science as the reason for their political turn. What is happening in the US is not unique. Wherever rightwing populists triumph science is likely to suffer. Jair Bolsonaros rule in Brazil saw him attack scientists and cut environmental funding. In India Narendra Modis Hindu nationalist government purged the theory of evolution from school textbooks. In Britain Reform UK has already attempted local government cuts targeting net zero spending. Having scientists in office will not solve this problem alone but as unexpected targets of populist politics they are now part of the coalition resisting it. Scientists have tended to avoid party politics for a specific reason. Historians identify an implicit scientific social contract that emerged in western states after the second world war which established the state as the main funder of research but in theory discouraged direct political interference by government. Many scientists believe that"
+    },
+    {
+        id: 6504,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 207",
+        passage: "The Congress in Kerala has been counting its chickens before they hatch. For several weeks senior leaders have been positioning for the Chief Ministers post assuming that the United Democratic Front UDF would win the Assembly elections on May 4. Just as the party sought to put a lid on the unseemly public display of personal ambition its most important ally muddied the waters. Panakkad Sadiq Ali Shihab Thangal State president of the Indian Union Muslim League IUML publicly backed VD Satheesan for Chief Minister citing exit polls of dubious authority and urging the Congresss central leadership to let public sentiment guide the choice. The blowback was immediate. Sectarian leaders who have been whipping up anti Muslim sentiment were quick to claim that the Congress and the UDF were in the IUMLs stranglehold. The charge has a history to feed on. The IUMLs maximalist demands for seats cabinet berths and portfolios have contributed to that impression and are at least partly linked to rising tensions between the Muslim community on the one side and Hindus and Christians on the other a realignment that has proved beneficial for the BJP. The UDF may have barely stalled the disintegration of its social base in this election if at all. The IUMLs public posturing is a stinging reminder of what to avoid if the Front is to remain viable in the face of rapid social change. The conventions of Keralas coalition politics are clear and have held for decades. A single party rarely wins an absolute majority the partners of a Front collectively win those numbers. The leading party Congress in the UDF CPIM in the Left Democratic Front elects its legislature party leader who is then accepted by the Front as Chief Minister. There is no record of that decorum being broken by any junior partner in either Front. Neither Front contested this election with a declared chief ministerial candidate even the sitting Chief Minister Pinarayi Vijayan was not named as the LDFs CM candidate. In both Fronts the Chief Minister has emerged through a two step process  involving  newly  elected  MLAs  and  the  central  leadership  of  the  party concerned. In the"
+    },
+    {
+        id: 6505,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 208",
+        passage: "The UNFCCCs CoPs have almost always come unstuck on the issue of fossil fuels. In the last week of April representatives from more than 50 countries gathered at Santa Marta  in  Colombia  for  a  climate  conference  born  of  frustration  with  the  UN administered negotiations. The deliberations ended on Wednesday with a call for participating countries to develop national roadmaps to end the use of fossil fuels in fact France pledged to phase out oil and gas use between 2030 and 2050. The UNFCCCs CoPs have almost always come unstuck on the issue of fossil fuels. By operating outside the consensus bound framework the Colombia conference gave itself the leeway to advance faster than CoPs. However the very feature that imparted dynamism to Colombia also limited its potency. Three of the highest GHG emitters the US China and India were not represented at Santa Marta. It would however be wrong to dismiss the meet as inconsequential. The participating countries represented nearly 50 per cent of the global GDP. They agreed to align their trade and finance policies with green transition plans potentially creating momentum towards faster decarbonisation. But beyond the combined economic weight of its participants the conference was significant in bringing countries representing different economic segments onto the same page. While UN climate meets have often been riven by discord between developed countries emerging economies developing countries and small island states it was heartening that representatives of France Germany and Spain worked together with delegates from Brazil Nigeria Nepal and several other countries with varying economic clout at Santa Marta. UN meetings have not avoided reconciling different climate realities. However that has only meant postponement of difficult decisions. The Colombia meet could be the first step towards challenging the ambiguity that has allowed countries to pledge climate action while continuing fossil fuel expansion. That said the Santa Marta meet should not be seen as a parallel to the UN processes. Climate change is too complicated to be left to one global agency. It requires"
+    },
+    {
+        id: 6506,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 209",
+        passage: "Days after announcing its ill conceived decision to make basic Marathi language proficiency mandatory for all auto and taxi drivers from May 1 the text of the Maharashtra government extended the deadline to August 15. The move is a minor concession coming after auto and taxi unions objected to the arbitrariness of the announcement. It does little to undo the irrationality and constitutionally tenuous grounds of the original decision which if implemented would see the licences of a large number of non compliant drivers cancelled. At a time when public transport is plagued by more pressing issues such as affordability and accessibility the easy resort to narrow linguistic politics is troubling. In conditioning livelihoods on Marathi language proficiency the Maharashtra governments decision erects an informal barrier against internal migrants the very people who sustain urban economies like Mumbais. Such  measures  undermine  the  idea  of  the  nation  as  a  shared  civic  space  and undermine the constitutional promise of freedom of mobility which gives citizens the right to reside and settle in any part of India and practise any profession or occupation there. It is also bad economics subverting the spirit of a unified market where labour mobility is essential for efficiency and growth. Urban transport systems moreover depend  on  flexibility  scale  and  the  willingness  of  workers  to  migrate  where opportunities exist. A driver from Uttar Pradesh or Bihar should not find their dignity or employability contingent on linguistic assimilation. Maharashtra has a long history of language being weaponised for narrow political ends. Over the last year for example following the Devendra Fadnavis administrations oscillation on the three language policy first making Hindi mandatory at the primary school level then making it optional the Shiv Sena and the Maharashtra Navnirman Sena raised the pitch on the imposition of Hindi and cast themselves as the protectors of Marathi pride. The tactics used by the Raj Thackeray led MNS slapping bank officials for not offering services in Marathi for instance have underlined how easily parochialism"
+    },
+    {
+        id: 6507,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 210",
+        passage: "If theres one thing that the current US Iran war taught us it is that the world grossly underestimates how much we are dependent on West Asia. The ongoing conflict involving Iran has disrupted fertiliser flows from the Gulf a region that accounts for nearly half of global urea trade. You see production there has dropped sharply with weekly output falling by over 50 per cent since the conflict began. On the surface this may seem like just another commodity disruption. But urea is not just some input. It is the backbone of modern agriculture used extensively in crops like rice wheat and corn. And when supply tightens the impact does not stay confined to farms. It moves through the food system and eventually shows up in grocery bills. And for India the stakes are even higher. The country consumes roughly 400 lakh tonnes of urea every year but produces only about 300 lakh tonnes domestically. The remaining 25 per cent comes from imports a large share of which originates in the Gulf. At first glance this may suggest partial dependence. But the reality runs deeper. Because even Indias domestic urea is not entirely domestic. Producing urea requires ammonia and ammonia is made using natural gas. In fact natural gas is both the fuel and the primary raw material in the process. Close to 80 per cent of the cost of producing urea comes from gas prices alone. And here lies the hidden vulnerability. Around 86 per cent of the natural gas used by Indias fertiliser plants is imported much of it passing through the Strait of Hormuz the same geopolitical chokepoint now under stress. So even when India produces urea locally it remains indirectly exposed to global disruptions. That is only one side of the problem. The other lies in how urea is priced and consumed. Farmers in India pay a fixed price of around 266 for a 45 kg bag of urea. The actual cost of producing or importing that bag ranges anywhere between 1200 and 1700. The difference is absorbed by the government through subsidies which already  run  into  lakhs  of  crores  annually.  This  pricing  structure  has  ensured affordability but it has also created unintended consequences."
+    },
+    {
+        id: 6508,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 211",
+        passage: "With freedom comes great responsibility decisions made as a consequence of any freedom must be informed by reasonable awareness of the fall out. In seemingly vesting reproductive autonomy with the woman, the Supreme Court might have edged out the essential role of a clinical review of the situation. The Court asked the Union government to amend the abortion law to remove the time limit on medical termination of unwanted pregnancies in the case of minor rape victims. The Bench of the Chief Justice of India, Surya Kant, and Justice Joymalya Bagchi made the observation while refusing to entertain a petition against an earlier Court decision allowing a 15 year old survivor of rape to terminate the pregnancy during the 30th week. In the original judgment on the case, which was on curative appeal, the judges remarked that the right of the minor child to continue a pregnancy that is illegitimate must be considered, to safeguard a womans right to reproductive autonomy. The Bench of Justices B. V. Nagarathna and Ujjal Bhuyan had noted that the minor had shown a clear and consistent unwillingness to continue the pregnancy. The Court cannot compel any woman, much less a minor, to complete her pregnancy if she otherwise did not intend to do so, they said. They also indicated that if the legal routes were closed, women might take the dangerous path to quacks, risking life. However, counsel for the All India Institute of Medical Sciences stoutly opposed the termination, and the curative petition leveraging the same safety consideration. Terminating the pregnancy at an advanced stage 30 weeks would be inimical to the health of the teenage mother. Currently, Indian law allows for the termination of pregnancy up to 24 weeks of gestation. The entire argument hinges on gestational age, which, as an indicator of how far along the pregnancy is, is crucial to deciding whether an abortion would be safe. Most countries that have legalised abortion restrict the period of safe abortion to 24 weeks of gestation, primarily because of the negative implications for the life and health of the mother, after that. But, central to legal"
+    },
+    {
+        id: 6509,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 212",
+        passage: "The Union governments enthusiastic misuse of its spurious powers to censor lawful speech online is an alarming and exponentially growing threat to Indias democracy. With amendments to the IT Rules, 2021 which are themselves on shaky constitutional ground the government has successfully pressured Meta and X to take down content within three hour timelines that leave little time to push back, lest they lose safe harbour protections and be dragged into court or, worse, have their employees face personal criminal liability. Under the cover of fighting AI generated content, all speech is being subjected to a despotic regime where the state can silence speech at will, destroying the promise of the Internet, which has emerged as an important alternative voice to express everyday concerns. Visceral, hard hitting expressions of independent voices are an integral part of a society led by free ideals and representative democracy. Weaponising Sections 69A and 79 3 b of the IT Act, 2000 to take down such content, and accounts wholesale, distorts the public conversation in a way that benefits the ruling party, with scant regard for the freedoms of audiences and the livelihoods of creators. Often, entire accounts of the Opposition are deleted. Since this infrastructure of censorship has been built brick by brick without any moral compunctions on the path down which they lead, takedowns of independent media outlets and critical commentators have grown. Some have been reversed, at the cost of revealing their identity. The government continues to enjoy these powers under a veil of secrecy, publishing no meaningful data on how its hold on online discourse has tightened. By opening up the so called Sahyog portal to police officials around the country, requests under Section 79 3 b have been supercharged as a censorial rubber stamp that the IT Act simply does not give them. The clear Supreme Court precedent outlining what actual knowledge of illegality online constitutes for takedown orders has been reduced to a mockery. The Karnataka High Court has even brushed aside binding Court precedent under Shreya Singhal vs Union of India,"
+    },
+    {
+        id: 6510,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 213",
+        passage: "The ministry of Road Transport and Highways has issued a draft notification proposing the recognition of 85 per cent ethanol blended petrol E85 and even 100 per cent ethanol E100 as automotive fuels. This is as against the 20 per cent blend E20 that has already been achieved and made mandatory for all petrol sold in India from April 2026. The draft amendments to the Central Motor Vehicles Rules, 1989, once approved, will pave the way for the introduction of flex fuel vehicles that can run on E85, if not 100 per cent ethanol. While the vehicles manufactured since April 2023 are E20 compliant, compatibility with higher blends will require major overhaul of internal combustion engines and auto parts to withstand any potential corrosion from the hygroscopic moisture absorbing property of ethanol. The timing of the move is significant, coming amid the unprecedented energy supply shock caused by the conflict in West Asia and closure of the Strait of Hormuz. Oil marketing companies OMCs are now realising around Rs 75 for every litre of petrol, net of dealer commission and taxes. At this price, they are reportedly losing roughly Rs 14 per litre. The ex refinery price of petrol, thus, has to be at least Rs 89 per litre for them to absorb the higher cost of imported crude. Compare this to the Rs 60.73 71.86 per litre that distilleries are fetching for the ethanol they are supplying to OMCs. Simply put, ethanol derived from sugarcane, maize and rice is today cheaper than petrol refined from crude oil. It strengthens the case to incentivise the rollout of flex fuel vehicles along with separate dispensing units in fuel stations for higher ethanol blends. That said, global crude prices may not sustain at Dollar 110 per barrel levels beyond a time. The ethanol industry must prioritise long term cost competitiveness, which means raising cane and grain yields per acre and breeding varieties with higher sugar and starch recoveries. Nor should it expect the government to make available subsidised rice from the Food Corporation of Indias godowns. Also its not desirable to produce ethanol from water guzzling rice. More effort is"
+    },
+    {
+        id: 6511,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 214",
+        passage: "Of late youve surely seen a pretty purple latte on someones instagram or a drink with a beautiful violet swirl on your feed thats just too vibrant to ignore. Thats ube, the Filipino yam that has quite literally been taking over the worlds menu. But ube is more than just a colour trend. For a good while, matcha had the title. The Japanese green powder was everywhere. In lattes, desserts, skincare and sometimes, shockingly, in pastas too. By September 2025, matcha had starred in almost 70000 tiktoks. It was undefeatable until ube showed up, The Korea Herald even called ube the next matcha. That statement is apt. Ube has grown 230 per cent on restaurant menus in the US over the past four years, according to food analytics firm Datassential, and now features at 95 chains across the country and is predicted to grow more. Matcha never had this kind of trajectory. The coffee chains were quick to catch on. Starbucks tested ube at its Reserve locations in 2025 with an Ube Iced Coconut Latte and an Ube Espresso Martini, and people liked what they tried. This spring, they brought ube to its regular coffeehouses across the US. In Europe, Starbucks rolled out an ube range including an Ube Vanilla Velvet Matcha Latte which is essentially the passing of a torch. Costa Coffee joined in with a Sweet Ube Frappe and a Sweet Ube Hot Chocolate across its UK stores. This simply goes to show how the purple yam is evidently now a global chain staple. But how did ube suddenly slip into the limelight. Well, it was partly the colour leading to over 1,20000 tiktoks posted and 7,50000 Instagram posts tagged with it, partly because of the taste and partly because the food world runs on novelty and ube is just novel enough to feel exciting and not divide people. But heres the twist. The louder the demand outside the country, the quieter things are back home. The Philippines exported nearly 1.7 million kilograms of ube in 2025, thats up 20 per cent from the year before. But production has been declining by close to 2 per cent, with processors buying in bulk to feed global demand. The Philippines, where ube comes from, has begun importing"
+    },
+    {
+        id: 6512,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 215",
+        passage: "China senses opportunity when Donald Trump visits later this month. A nakedly transactional US president in need of a trade deal, and hoping that Beijing could lean on Iran, might shift on Taiwan in return. Chinas foreign minister, Wang Yi, linked the issue explicitly to broader bilateral cooperation in his call with Marco Rubio, the US secretary of state, on Thursday. Beijing would be delighted to see Mr Trump soften the US position, and perhaps pull back on arms sales after a mammoth Dollar 11bn package was announced late last year. Taiwan has been self governed since the end of Chinas civil war in 1949, so never ruled by Chinas Communist party. Xi Jinping has made unification central to his legacy. Three years ago, US intelligence assessed that he had told the Peoples Liberation Army to be ready for an invasion by 2027. But Beijing would surely prefer to achieve its goal without force. Even a blockade simulated in intensive military drills in December would come at a hefty economic price, and could quickly escalate. China could instead seek to keep building military and economic might, and upping intimidation, until it was clear the US would not risk intervention or Taiwan felt it had no choice. Beijing hopes even a small shift in US rhetoric this month might help to make unification seem inevitable in Mr Xis words to Taiwan. Analysts believe that China is highly unlikely to take a military path in the next couple of years. Some think it may see a relatively short window, another US president might be stauncher on Taiwan, the administration has pivoted away from Asia, is tied up in the Middle East and is burning through munitions, Taiwans surge in defence spending has yet to kick in. But Mr Trump is utterly unpredictable. Iran may show that great powers can do as they will but also that they can regret it. And Beijing appears convinced that the US is in decline, while its own power grows. Its armed forces are currently roiled by purges at the top. With a 2028 presidential election due in Taiwan, and the two main opposition parties joining forces for local polls this year, China also sees an improving"
+    },
+    {
+        id: 6513,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 216",
+        passage: "The results of the 2026 Assembly elections in Assam West Bengal Tamil Nadu Kerala and Puducherry highlight several factors that have a bearing on Indias direction as a secular democratic federal republic In Assam and Puducherry the BJP and its partners retained power while in the other three States incumbents were swept away in a strong current of changed popular opinion In Assam for the first time the BJP crossed the halfway mark of 64 seats on its own and with its partners won 101 seats in the 126 member Assembly For the Congress this is its worst performance even lower than its 1985 tally in the aftermath of the Assam Agitation The regional outfits that were part of the Congress led alliance including the Raijor Dal and Assam Jatiya Parishad were routed while those within the National Democratic Alliance NDA chiefly the Asom Gana Parishad and the Bodoland Peoples Front managed to win a few seats though they now have little clout given the BJPs outright majority Chief Minister Himanta Biswa Sarma has reinforced his position in the State through a mix of polarising communal rhetoric and redistribution schemes Congress leader Gaurav Gogoi lost his own seat In West Bengal the BJP has achieved a decisive victory through long term planning aided by the States political history a tainted election process and the exhaustion of the Trinamool Congress TMCs politics that had run its course Bengal has been home to Indias national movement and to Hindutva ideas long before they spread elsewhere and has carried a strong sense of regional identity The BJP through years of meticulous organisation converted a threshold population of the State to its totalising nationalist narrative Having subsumed the regional politics of Maharashtra Assam and Odisha it had set its sights on West Bengal with obsessive determination and has won The TMC faces existential danger with its founder leader Mamata Banerjee at 71 and its cadre and voters now susceptible to pressure from the BJP This election was also the most tainted in Indias elections around 27 lakh people were arbitrarily removed from the electoral rolls and the Supreme Court of"
+    },
+    {
+        id: 6514,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 217",
+        passage: "Why lithium discoveries dont immediately change much for the US In todays Finshots we explain why lithium discoveries dont immediately change much for the US But heres  a  quick  sidenote  before  we  begin  Were  hosting  a  free  2  day  Insurance Masterclass that helps you build real financial security by understanding health and life insurance the right way Tuesday 5th May at 6 30 PM Life Insurance How to protect your family choose the right cover amount and understand what truly matters during a claim Wednesday 6th May 6 30 PM Health Insurance How hospitals process claims common deductions the mistakes buyers usually make and how to choose a policy that wont disappoint you when you need it most The Story Deep in the Appalachian Mountains stretching across the Carolinas in the United States lies a deposit that could power millions of electric vehicles The US Geological Survey has found 2.3 million tonnes of recoverable lithium deposits in the region And its not just the US A few years ago India also made headlines after discovering lithium reserves in Jammu and Kashmir estimated at around 5.9 million tonnes That figure put India on the global lithium map for a while Similar announcements have come from parts of Europe Africa and South America with Bolivia and Argentina sitting atop vast salt flats that together form what geologists call the Lithium Triangle holding over half of the worlds known reserves  On  paper  this  should  change  everything  After  all  lithium  is  a  critical ingredient in the lithium ion batteries that power electric vehicles EVs and store energy  from  renewable  sources  like  solar  and  wind  So  the  next  step  feels straightforward If more countries are finding it within their borders the global balance of power should begin to shift Energy independence and cleaner supply chains suddenly seem within reach Except that shift hasnt really happened To understand why you have to start at the beginning Finding lithium in its raw form is only the first step and it turns out the easiest one Lithium as an element exists in different forms and not all of them are straightforward to extract Which is where things start to"
+    },
+    {
+        id: 6515,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 218",
+        passage: "The announcement of the withdrawal of thousands of US troops from Germany underlines the urgency of a pan European defence strategy As Donald Trumps second term has become overshadowed by plunging poll ratings and an ill advised war in the Middle East European governments have regularly been singled out to bear the brunt of the US presidents growing frustration Sir Keir Starmers refusal to militarily back the attack on Iran led to unfavourable comparisons to both Winston Churchill and King Charles Unfriendly Spain has been threatened with a trade embargo for similar reasons Italys prime minister Giorgia Meloni previously seen as a key political ally has also been on the receiving end Im shocked by her Mr Trump said last month I thought she had courage I was wrong Currently it is Germanys chancellor Friedrich Merz who finds himself in Washingtons crosshairs In the wake of Mr Merzs accurate observation that the US has no convincing strategy on Iran the Pentagon has announced the future withdrawal of 5000 US troops from bases in Germany Vital long range weapons are also to be withheld as American military stockpiles are depleted by events in the Middle East For good measure Mr Trump has threatened to raise tariffs on European car manufacturers to 25 per cent a measure that would hit Germany hardest At the weekend Mr Merz was at pains to stress that he was not giving up on either the transatlantic relationship or his own with Mr Trump Given the stakes he was right to do so though the US presidents thin skin vengeful instincts and overt hostility to the EU mean that the next flare up will never be far away But the latest evidence of Washingtons desire to disengage from its postwar role as the guarantor of Europes security should have ramifications beyond diplomacy In a changed world where old assumptions  no  longer  apply  the  potential  shape  of  future  European  defence cooperation has gradually become clearer over the past year The French president Emmanuel Macron has said that Frances strategic nuclear deterrent could be extended across the continent The EU has meanwhile made Euro 150bn available in cheap loans for"
+    },
+    {
+        id: 6516,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 219",
+        passage: "India scaled a record peak demand of 256.1 GW on April 25 with solar plants supplying 21.5 per cent of the afternoon load an all time high, and the clearest signal yet that the countrys installed solar fleet can do real work when the sun is overhead. But the same days full 24 hour ledger told a more sobering story. When there was accounting for the whole day of April 25, solar contributed only about 10.8 per cent of daily generation, and just 0.1 per cent of the evenings needs after sunset. Solars share of Indias installed electric capacity has nearly doubled from about 15 per cent in 2022 to nearly 28 per cent in early 2026. However, solar accounted for roughly 5.6 per cent of generation on Indias peak demand day in 2022 and only increased to the 10.8 per cent of April a clear indication of the yawning gap that remains between the realities of the present and what is possible. The bottleneck is not panels, land or ambition but the inability to use the vast stores of generated electrons through batteries. In fact, such is the paucity of battery storage that States which are prolific producers of solar power are being asked to halt their supply, lest it compromise the stability of Indias electric grid. In 2025, India had to curtail 2.3 terawatt hours of solar generation between late May and December, equivalent to 18 per cent of average monthly solar output, with 0.9 TWh terra watt hours wasted in October alone. Given that producers of such electricity must be compensated, this ends up being a cost to the public exchequer which pays for power that was never delivered. The India Meteorological Departments forecast of a below normal monsoon at 92 per cent of the Long Period Average the first such warning in 11 years only sharpens the argument, a hotter, drier summer means greater daytime demand, which is precisely when solar should be doing the heavy lifting. The encouraging news is battery economics. Standalone two hour battery storage tariffs fell from around 2.21 lakh per MW per month in early 2025 to 1.48 lakh by year end. The challenge is execution. Only 0.7 GWh of battery storage was operational in India by"
+    },
+    {
+        id: 6517,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 220",
+        passage: "The Indian Navys Project 17A is a 45000 crore programme to build seven Nilgiri class frigates, with anti air, anti surface, and anti submarine capabilities, as an advanced complement to the Shivalik frigates and a precursor to Project 17B. The Project delivered the INS Mahendragiri on April 30, completing six deliveries in 17 months, but had previously faced multiple delays. The Comptroller and Auditor General CAG of India has flagged hundreds of design changes in previous warship classes during construction. Deliveries had been delayed even though ships were nominally complete because they lacked critical components such as engines and sensors, allowing the projects to meet commissioning dates on paper while leaving the hull unprepared for combat. A 2025 CAG report found that the Navy was inducting platforms without building the supporting infrastructure. While Project 17A used 75 per cent indigenous components by value, many critical parts were sourced from abroad, and without them the vessels final integration was withheld. Currently, India can build most of each ship but exercises limited control over timelines. The Indian Ocean carries most of Indias energy  imports  as  well  as  Chinese  naval  deployments,  but  the  nature  of  these challenges alone does not resolve the kind and scale of response they merit. India built the Chain of Static Sensors after the 2008 Mumbai attacks, with radar hardware involving imported parts. The Chain has been extended to Mauritius, Sri Lanka, and the Seychelles, and together with naval platforms forms a detect decide respond system. But while naval satellites and underwater sensor networks provide the detect aspect, the frigates radars and sonars remain the most imported and thus most delayed components, limiting the vessels ability to function as mobile sensors. Adding more surface combatants is like adding receivers to a network still transmitting a fuzzy picture. Granted, securing sea lanes and addressing non traditional threats such as Houthi drone and missile activity justify some number of multi role frigates. However, these platforms are also overkill for countering piracy"
+    },
+    {
+        id: 6518,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 221",
+        passage: "The Indian rupee continues to weaken. On Tuesday, it hovered around 95.36 against the dollar during early trading. Since the beginning of this year, the currency has fallen by around 5.64 per cent. Sentiment continues to be weighed down by the conflict in West Asia, with fresh attacks rattling investors. But the pressure on the Indian currency predates the Iran war. Last year, the rupee fell by roughly 5 per cent against the dollar. The problem is on both the current and capital accounts. Global crude oil prices remain elevated due to energy market dislocations, exerting pressure on the current account. Brent crude is currently around Dollar 113 per barrel. In April, the price of the Indian crude oil basket averaged Dollar 114.48 per barrel, according to data from the Petroleum Planning and Analysis Cell. There is the possibility of the current account deficit widening to around 2 per cent in 2026 27. While this is considerably lower than that around the period of the taper tantrum the deficit had widened to 4.8 per cent of GDP in 2012 13 financing it will be challenging in the current environment. Capital flows are under pressure. So far in the calendar year, foreign portfolio investors have taken out around Dollar 21.2 billion from the stock markets. This comes after outflows of Dollar 18.9 billion last year. While the central bank has been taking steps to ease the stress on the rupee, its short dollar book has swelled, the pressure on the currency continues. In previous episodes of such stress, the RBI attempted to facilitate capital inflows through various instruments. For instance, during the taper tantrum, funds were mobilised through the FCNR B deposits. So far, retail fuel prices have not been adjusted to reflect the higher global prices. But there are limits to the burden that can be borne by the oil companies and the government the war has been going on for more than two months. Higher prices at the pump will push up retail inflation across the country retail inflation edged up to 3.4 per cent in March. A few days ago, the price of the commercial LPG cylinder was raised by Rs 993, which will"
+    },
+    {
+        id: 6519,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 222",
+        passage: "Indias energy transition story has always carried a built in contradiction. On one hand, the  country  has  made  ambitious  commitments  toward  renewable  energy  and decarbonisation. For instance, to solar and nuclear energy through the International Solar Alliance and advances in stage 2 nuclear reactors, respectively. Wind energy production  has  also  scaled  rapidly,  policy  support  has  strengthened,  and  global investors increasingly view India as a key part of the clean energy transition. On the other hand, coal continues to sit at the centre of Indias energy system. It powers around 74 per cent of electricity generation and remains critical for industries such as steel, cement, and fertilisers. This creates a difficult balancing act, dont you think The country needs to grow, industrialise more, and provide reliable energy to a large population. But doing that without sharply increasing emissions is not straightforward. After all, thats exactly what the current global north has done to modernise its societies. In a previous story, we mentioned that any energy source that is meant to be widely adopted must satisfy three conditions, it must be predictable, scalable, and have low carbon emissions. Renewable energy, while expanding quickly, still has not fully ticked the first and second boxes. Coal, on the other hand, despite being a major pollutant, remains  dependable,  abundant,  and  relatively  cheap.  And  this  is  where  the governments  latest  push  toward  coal  gasification  fits  in. Backed by a 37500 crore incentive scheme, the idea is to move beyond simply burning coal and instead convert it into synthetic gas and chemicals that can be used across industries. On paper, it looks like a way to reduce dependence on imported fuels such as natural gas while making domestic coal more versatile. To understand whether this is a meaningful shift or just a rebranding of coal usage, it helps to look at what coal gasification actually does. In a traditional setup, coal is burned in open air to generate heat,  which  is  then  used  to  produce  electricity  or  power  industrial  processes. Gasification changes that approach. Instead of"
+    },
+    {
+        id: 6520,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 223",
+        passage: "Himanta Biswa Sarma is expected to take oath as Chief Minister after leading the BJP to power in Assam yet again. Mr Sarma was a Congress leader when the party came to power in the north eastern State in 2011 but switching sides in 2015 he became the central figure of the BJP not only in Assam but also in States around it. Starting in 2001 on a Congress ticket he has won six consecutive elections from the same Assembly seat. Having emerged as a very powerful leader he joined the BJP and was appointed Chief Minister in 2021. Since then he has reshaped the politics of the State through exceptional organisational ability communal rhetoric and the partisan use of state power. An infrastructure push combined with welfare delivery the Orunodoi scheme of direct cash transfer to women and Mission Basundhara a flagship initiative to streamline and digitise land records and protect land rights not only enabled the BJPs deep expansion but along with other measures including the delimitation of Assembly constituencies in 2023 reshaped the States political landscape. Mr Sarma has been both the creator and the principal beneficiary of this process. The BJPs victory in Assam has significant implications for power dynamics within the party nationally. Mr Sarma is perceived to be close to Union Home Minister Amit Shah. The BJP alone commands a majority in the 126 strong Assembly and the ruling coalition has 102 members. The BJP has not only decimated the Opposition but also rendered regional parties inconsequential. It has consolidated a spectrum of fragmented social groups and diluted the linguistic and ethnic politics of the State. But in doing so it has sharply polarised Assam along religious lines. The delimitation carved out constituencies by packing and cracking communities in ways that suppress Muslim representation with the BJP and the Congress now mirroring a Hindu Muslim binary in the newly elected Assembly. Eviction drives have disproportionately targeted Bengali speaking Muslim communities 40000 individuals were displaced in 2025 alone officially framed as anti encroachment action but widely seen as selective"
+    },
+    {
+        id: 6521,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 224",
+        passage: "Riding a massive anti incumbency wave the Congress led United Democratic Front UDF returned to power in Kerala on May 4 ending 10 years of its being in the political wilderness. After an unprecedented defeat in 2021 the alliance worked systematically for a comeback winning four bye elections the general election in 2024 and the civic body polls last year before storming back into the State Assembly through deft electioneering and collective effort that sought to capitalise on surging resentment against the functioning of the Left Democratic Front LDF government led by CPI M leader Pinarayi Vijayan. The BJP reopened its account securing three seats finishing second in six and clinching a substantial share of votes in pockets in north central and south Kerala redrawing the electoral landscape. Its low vote share notwithstanding the party is doubtless growing albeit incrementally. To be fair to the Left which received a debilitating blow the outgoing government embarked on a path of growth filling infrastructure gaps soliciting private investment and pursuing sustainable industries without forgoing its Leftist thrust on welfare and public  governance  despite  facing  fiscal  embargoes  and  pocket  veto  by  inimical Governors. While Left supporters acquiesced in its political economy many could not digest the lack of accountability and the overbearing if not dismissive demeanour of the CPI M s senior leadership. The Left tried to claim what was seen as an emerging Hindu vote base through events such as the Global Ayyappa Devotees Meet even while selectively targeting the Indian Union Muslim League IUML for presumably being in concert with the forces of political Islam. The IUML employed everything in its armour to hand a crushing defeat to the Left not just in Malappuram its stronghold but also in other parts of the State. Rebellion broke out in the rank and file of the Left ahead of the elections over issues of nepotism and the concentration of power in a single person bestowed with a cult status which the UDF leveraged. It led to the fall of some decades old Left citadels with a cascading effect elsewhere as well. Back"
+    },
+    {
+        id: 6522,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 225",
+        passage: "In his speech after the assembly results came in on May 4 Prime Minister Narendra Modi framed the BJPs victory in West Bengal as a turning point. It would mark a break from a political culture marred by fear and violence he said the state would be bhay mukt. Bringing about this change in a state where political violence has a long and tangled history will require a deep resolve from the new ruling party its leaders and workers. The task of rejuvenation and repair however also requires a buy in from the outgoing Trinamool Congress. Unfortunately in the 48 hours since the election results the sounds of violence though much more muted and erratic than after say the 2021 election result are disquieting. Cycles of retributive political violence have historical roots in Bengal. As far back as the early 20th century the then undivided Bengal was the epicentre of militant  resistance  to  colonial  rule  and  of  brutal  responses  by  the  colonial administration. The region saw outbreaks of communal rioting and later with the birth of Naxalism in the 1960s violence flared between the government and anti state political parties and in internecine conflict between the communist factions. The 34 years of CPI M rule as a result of this history and because of the blurred lines between a cadre based party and the state deepened the culture of fear and intimidation. The TMC inherited that structure which it expanded into a parallel network the syndicate that became an important reason for its decline. Now the BJP has the opportunity to break this dismal pattern. It must not miss it. BJP state president Samik Bhattacharya seems to recognise that the mandate is not just for a change in government but for a new grammar of politics. He has warned party workers against targeting TMC offices or showing disrespect to the outgoing Chief Minister. Unfortunately however his colleague Suvendu Adhikari has chosen the moment to send out a divisive and polarising message Having defeated Banerjee in her bastion of Bhabanipur he has said he would work only for the Hindus who purportedly voted for him and not for the Muslim minority that according to"
+    },
+    {
+        id: 6523,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 226",
+        passage: "In May 2020 the Centre had launched the Emergency Credit Line Guarantee Scheme ECLGS to support firms especially MSMEs in dealing with the fallouts of the Covid pandemic. The facility had benefitted 1.19 crore borrowers with guarantees adding up to Rs 3.61 lakh crore being issued. With the West Asia conflict now disrupting economic activities once again though the current disruptions are of a lower order of magnitude the government has launched a similar credit guarantee scheme ECLGS 5.0. This is a welcome measure which could help firms bridge short term liquidity mismatches. The scheme targets additional credit of Rs 2.55 lakh crore including Rs 5000 crore for airlines. Credit will be extended to MSMEs and non MSMEs excluding aviation up to 20 per cent of their peak working capital utilised during the fourth quarter of the last financial year capped at Rs 100 crore. For airlines it will be extended up to 100 per cent capped at Rs 1500 crore. The moratorium under the scheme is for a period of one year for MSMEs and two years for the airline sector. This should provide relief. Economic activities have been disrupted across a range of sectors. Considering that MSMEs are unlikely to have deep pockets to absorb the surge in input costs and have limited capacity to absorb supply chain disruptions they are the worst affected. In the last MPC meeting committee member Ram Singh noted that high input costs driven by energy spikes and supply side disruptions have disproportionately affected the MSME sector which lacks the working capital bandwidth to tide over these shocks. Nagesh Kumar another member had said that the shortage of natural gas has affected many MSMEs that use it as a fuel. Airline companies too have been hit by the conflict. The world over there are reports of airlines cutting flights and raising ticket prices. In the US the surge in jet fuel prices combined with existing financial stress has pushed Spirit Airlines to the brink. In India oil marketing companies raised the price of aviation turbine fuel for international flights last week while keeping it unchanged for domestic flights providing some"
+    },
+    {
+        id: 6524,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 227",
+        passage: "Before we explain what changed lets give you a quick rundown of what FDI Foreign Direct Investment is and how it works. If you already know this bit you can simply skip the italicised bits and pick up from there. FDI is when a company or individual in another country invests money into a business in India by buying shares setting up a subsidiary or forming a joint venture. And there are two ways a foreign company or individual can do this. First is the automatic route where the foreign investor does not need prior government approval. They can invest and then report the transaction to Indias  central  bank  the  RBI  Reserve  Bank  of  India.  Most  sectors  such  as  IT manufacturing and hospitality freely allow this. Second is the government approval route where the foreign investor needs prior permission from the relevant ministry before investing. This applies to sensitive sectors like defence media banking insurance and spaces involving special restrictions. Different sectors also have caps on how much of a company a foreigner can own. For example in insurance its 100 per cent and 74 per cent in private banking. All of this is governed by the FEMA Foreign Exchange Management Act and the Department for Promotion of Industry and Internal Trade DPIIT which issues policy guidelines for FDI in India. These guidelines have a special name and are called press notes one of which was issued back in 2020. This one called Press Note 3 said that any entity from a land border sharing country or any company where even one share is beneficially owned by someone from these countries must seek government approval before investing in India. So even the automatic route was effectively locked out for companies with even a tiny Chinese investor on their cap table. Now there were two justified reasons why this strict press note was issued. For starters there was a growing concern that Chinese companies were increasing their stakes in Indian companies at cheap valuations during the pandemic. Chinese giants like Alibaba and Tencent along with VCs were among the biggest investors in Indian startups back then picking up stakes in 18 of Indias"
+    },
+    {
+        id: 6525,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 228",
+        passage: "Each major fire accident in cities that ends up claiming human lives fleshes out different sets of causative and exacerbating factors. The recent one in Shahdara in East  Delhi  highlighted  a  lack  of  sufficient  attention  to  planning  for  evacuating buildings in the case of emergencies mainly fire. Nine people were killed and some 15 were rescued with grievous injuries in that accident. The residential building stilt plus four floors comprising eight houses had security enhancing features that turned out to be deadly electronic locks on doors that could not be opened a terrace that was not easily accessible and metallic grills around the building including on balconies that had to be cut for access by fire service personnel seeking to rescue the victims. A fire in March in Palam in which nine of an extended family died highlighted access problems that fire services face in Delhi. The mixed use building had few of the recommended  firefighting  facilities  required  in  such  buildings.  Eyewitnesses complained that the hydraulic lifts used by fire services personnel to access higher floors were malfunctioning. Though the fire services insist they reached the Shahdara accident spot on time response times have been longer in the capital city at other times. In a fire in Dwarka in 2025 fire engines could not enter the residential society because the name board of the society was blocking them. While there is certainly a case for reviewing the fire preparedness and fire fighting capabilities of Delhi what often goes unaddressed are electrical problems that cause these fires across Indian cities. As summer sets in air conditioning blasts are often casually cited as in the Shahdara fire. What often happens is overloading of equipment such as the airconditioner during hot summer days. The wires that are not designed to handle such loads burn due to heat and the circuit breakers that should have tripped the equipment as protection do not do so. In India the hierarchy of loads and circuit breakers is often not observed as residences are packed with high load equipment beyond what the system can safely carry. The intent is often"
+    },
+    {
+        id: 6526,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 229",
+        passage: "In the days between the horrific attack on civilians in Pahalgam on April 22 last year and the beginning of Operation Sindoor on May 7 a question loomed large over Indias strategic establishment. After the surgical strikes 2016 and Balakot attack 2019 raised the costs of sponsoring terrorism for Pakistan what further deterrence could India offer short of risking all out war. Pulling off a calibrated response in a nuclearised neighbourhood was no easy task. The success of Operation Sindoor erased doubts about Indias ability to respond to state sponsored terrorism. Military and strategic targets were struck by the Indian Air Force and it was clearly communicated that New Delhi was not the aggressor and the escalations were driven by Rawalpindi. The entire country and political class from the Omar Abdullah government in Kashmir to the national Opposition stood behind the victims of Pahalgam and the action of the armed forces. A year on it is important to reflect on the lessons from this crucial inflection point in the fight against terrorism. The Pahalgam attack underscored that intelligence especially human intelligence sources on the ground continues to be the first line of defence against terrorism and insurgency. That said one year on infiltration from across the border remains a fraught challenge. The decision to send multi party delegations to world capitals to tell Indias story after the military operation showed that Delhi understands the power of the narrative. At the same time it is important to acknowledge Islamabads current leverage with the Trump administration even if it is limited to an optics even theatrics of convenience. That frames the challenge as India and the US move ahead securing partnerships from defence and technology to trade and investments. Going ahead for India two important aspects stand out. Op Sindoor laid bare the growing cooperation between China and Pakistan in defence and intelligence. Delhi must deepen its own ties with like minded partners to ensure it continues to have the edge not just in the conventional domain but also in cyber and sub conventional warfare. In an age"
+    },
+    {
+        id: 6527,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 230",
+        passage: "Delhis air quality index shows that pollution levels have dipped with the onset of summer. That shouldnt be a cause for complacency for policymakers. Analysis by the public policy think tank Envirocatalysts underscores the need to continually monitor interactions  between  pollutants  and  meteorological  conditions.  Vehicular  exhaust construction dust coal based power generation and waste burning incidents do not change with the seasons. What changes instead is how these emissions behave once released  into  the  atmosphere.  In  winter  temperature  inversions  and  stagnant atmospheric conditions mean pollutants are trapped close to the ground leading to high concentrations of particulate matter PM. The Envirocatalysts study shows that in summer emissions of nitrogen oxides NOx and volatile organic compounds VOCs interact with the suns strong rays to produce ozone. The think tanks analysis of Central Pollution Control Board data since 2015 shows that the concentration of the pollutant is the highest in May. Ozone does not produce the haze associated with PM pollution. However its public health implications should not be downplayed. Short term exposure can cause chest pain cough and throat irritation while in the long term it can exacerbate chronic respiratory diseases. Unlike PM which affects both indoor and outdoor environments ozone is primarily an outdoor pollutant but can infiltrate indoor spaces. It is also known to affect vegetation damaging ecosystems. The countrys air quality standards and emergency response mechanisms such as Delhis  graded  action  plans  are  largely  built  around  PM  thresholds.  Regulatory frameworks often operate in silos targeting specific pollutants without accounting for how they behave in different seasons. For example measures to reduce vehicular emissions focus largely on particulate filters but overlook NOx emissions which are critical precursors for ozone formation. VOC emissions are difficult to monitor because they originate from multiple sources. Fundamentally however the approach to reduce ozone pollution should not be very different from curbing PM emissions it requires long term"
+    },
+    {
+        id: 6528,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 231",
+        passage: "What happens when one of Wall Streets most chaotic companies tries to buy one of the internets oldest marketplaces. Well thats essentially whats happening with GameStop and eBay. GameStop is a videogames and gaming merchandise retailer and is best known today for the meme stock frenzy of 2021. A meme stock is a stock that suddenly becomes popular among retail investors because of social media hype rather than changes  in  the  companys  actual  business.  eBay  meanwhile  is  a  global  online marketplace that still generates billions of dollars in revenue every year and effectively four times GameStops size. So the obvious question is why would GameStop even think about buying a company thats several times bigger than itself. To answer that we first need to understand what exactly GameStop is and what its trying to become. See a few years ago GameStop looked like a dying business. Its stores still relied heavily on selling physical video game discs even as the gaming industry rapidly moved online. Players were increasingly downloading games directly through platforms like Valve Corporations Steam or through digital stores on gaming consoles. Fewer people were walking into stores and buying physical discs was slowly starting to feel obsolete. Then came 2021. A bunch of folks influenced by a subreddit Reddit community called r WallStreetBets began heavily buying GameStop shares to take on large institutional investors who were heavily shorting the stock basically betting that GameStops stock would fall because of its failing business model. That triggered one of the wildest stock market episodes in recent history sending GameStops stock price soaring and suddenly turning it into one of the most talked about companies on Wall Street. Now the important thing here is that its business itself didnt magically change overnight. GameStop didnt suddenly reinvent retail or discover  a  breakthrough  new  strategy.  But  the  stock  surge  gave  the  company something incredibly valuable attention cash and most importantly time. Even Ryan Cohen the companys CEO has admitted that GameStop probably should have gone bankrupt multiple times over"
+    },
+    {
+        id: 6529,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 232",
+        passage: "The meaning of the term ceasefire should be self evident. Yet Israels strikes have killed scores of people in Lebanon since it agreed a truce with Hezbollah under pressure from the US with the two sides trading fire. There was a strike on Beirut on Wednesday. Benjamin Netanyahus government would be delighted to resume war with Iran. But it is wary of Donald Trumps wrath as he seeks an exit from the conflict. In Gaza the Israeli military has killed more than 800 people since the truce there was declared in October striking almost every day. This too is not a true ceasefire but a de escalation however necessary. Lethal Israeli attacks on an engineer and drivers transporting water have intensified the water crisis that is fuelling the spread of infectious diseases Medecins Sans Frontieres has called the weaponisation of water supplies a campaign of collective punishment. Never mind the estimated Dollar 70bn cost of reconstruction homes are still being flattened. Families in tents face a rat infestation. Essential medicines are unavailable. Hospitals and schools lie in ruins. An analysis of the wars impact on education described children feeling like the living dead. Israel agreed to end attacks massively increase the aid allowed into the territory and withdraw its forces to within a yellow line still accounting for 53 per cent of the territory. Yet strikes have continued aid flows yo yo and essential items are blocked on the claim that they are dual use. The  military  has  expanded  its  zone  of  control  substantially  and  the  unmarked surrounding area in which Palestinians are considered legitimate targets. Israels Army Radio has said that military leaders are pushing to resume the war. Yet far from pressing Mr Netanyahus government to uphold its phase one commitments the US led Board of Peace has made it clear that it will not hold Israel to them unless Hamas agrees to the phase two framework for disarmament set out by the panel according to a document obtained by the Times of Israel. The newspaper reported that the letter from the high representative for Gaza Nickolay Mladenov and a senior US official Aryeh"
+    },
+    {
+        id: 6530,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 233",
+        passage: "The people of the Union Territory of Puducherry no strangers to fractured electoral verdicts have decisively handed another term to the All India N. R. Congress led National Democratic Alliance favouring continuity and the status quo. Despite an unremarkable governance record the NDA retained power largely due to the first past the post system which disproportionately rewards parties with the highest vote share. This is what has been reflected in the results of the 2026 Assembly poll. On the face of it the NDAs victory appears convincing but a closer look at the vote share data tells a different story. By winning 18 of the 30 Assembly seats the ruling alliance gained two more seats than in 2021 even as its vote share fell to about 38 per cent nearly five percentage points lower than five years ago. On the other hand the Congress led INDIA bloc with about 32 per cent of votes lost two seats and its tally stood at six. It also suffered erosion of its vote base by around 3 per cent. The presence of the TVK has caused vote share loss to the two formations though the NDA ultimately emerged victorious. The TVK along with its ally won three seats with a vote share of around 18 per cent. Apart from the charismatic appeal of the TVKs founder C. Joseph Vijay the prolonged wrangling over seat sharing within the INDIA bloc hurt the alliances prospects despite its emphatic Puducherry Lok Sabha victory two years ago by over 1.3 lakh votes. Chief Minister N. Rangasamy set to begin his fifth term deserves credit for shielding his alliance from the TVKs challenge despite speculation before the polls that the All India N. R. Congress might leave the NDA to join the fledgling party. Instead of taking steps for the implementation of his electoral promise of securing Statehood for Puducherry  Mr  Rangasamy  should  focus  on  delivering  better  governance.  The functioning of the outgoing regime came in for sharp criticism from the office of the CandAG which in its report for 2023 24 had rapped the AINRC headed regime for spending beyond its means. Apart from ensuring administrative continuity and closer alignment with the Centre the"
+    },
+    {
+        id: 6531,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 234",
+        passage: "The clear results of the recent assembly elections be it the emphatic return of the incumbent in Assam or the ringing out of the old in West Bengal Tamil Nadu and Kerala underscore the need for the new governments to urgently address the problems plaguing the economies. The most pressing task is to raise the rate of economic growth. Of the four states only Assam has done well enough registering a compound annual growth rate of 11.4 per cent between 2014 15 and 2023 24. Over the same period Tamil Nadus economy expanded by 10.3 per cent while the growth rates of Kerala 8.6 per cent and West Bengal 9.1 per cent could not even reach double digits. For perspective between 2004 and 2026 Indias overall CAGR has been 12.3 per cent. This shows that even Assam could improve and grow much faster not to mention West Bengal and Kerala which are effectively dragging back Indias overall growth rate because of their sluggish growth. Data shows that all the four states are increasingly burdened by debt and rising levels of interest payments. Typically states are allowed to borrow money but such borrowings are better spent on the creation of productive assets such as roads and ports the kind of investment that will boost growth and allow the state to pay back the borrowing through higher tax collection in the future. But a look at the revenue deficits shows that be it Kerala West Bengal or Tamil Nadu all three states have been borrowing money just to pay for their day to day expenses such as salaries and pensions. A more recent challenge has been posed by the increase in unconditional cash transfers by state governments. In Assam 4.3 per cent of revenue receipts go towards such transfers West Bengal is worst at 10 per cent. Debt ridden government finances and slow economic growth are two sides of the same coin. Governments that borrow recklessly to pay for unproductive schemes actively weaken economic growth. The growth rate in per capita GDP far slower than the growth rates of overall GDP as well as uncomfortable levels of unemployment are a reflection of the stresses building up in the system. These mandates should be seen as"
+    },
+    {
+        id: 6532,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 235",
+        passage: "On May 3 2026 Bengaluru based space tech startup GalaxEye launched Mission Drishti. Now this may sound like just another satellite launch. But the underlying technology is actually quite interesting. Traditionally satellites have relied on either optical sensors or Synthetic Aperture Radar SAR sensors. Optical sensors work much like a regular camera capturing visual imagery while SAR uses radar waves to see through clouds darkness and poor weather conditions. Both are useful individually. But combining the two creates a much richer picture of Earth. The problem though is that the data usually comes from different satellites captured at different times and angles creating inconsistencies. And thats what Mission Drishti attempts to solve. Instead of merging data later GalaxEye built both sensors into a single satellite so they can observe the same target simultaneously. The real magic however happens in the software layer. AI models fuse the data from both sensors into a single unified image with far higher accuracy than conventional approaches. Even after all this there is still one bottleneck. Most of the heavy computation still happens on Earth where GPUs process the raw satellite data after it is transmitted back from orbit to terrestrial data centres. But imagine what if satellites themselves could run datacentre grade AI models directly in space. That is exactly what companies are now chasing. And it is where the idea of orbital data centres starts becoming far more than science fiction. Earlier this week Bengaluru based space startup Pixxel announced plans to launch Indias first orbital data centre satellite. The satellite called Pathfinder is expected to go into orbit as early as this year and will host datacentre grade GPUs directly in space. Its first major workload is expected to involve Sarvams AI models which would analyse crops infrastructure and weather patterns directly in orbit. That last part is what were going to focus on for now. Because Pathfinder wants to eliminate that entire loop of satellites capturing raw imagery and beaming it back to Earth where data centres process the information."
+    },
+    {
+        id: 6533,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 236",
+        passage: "The Union Labour Ministry has announced that it will provide a free annual health check up to workers aged 40 years or more following an existing provision in the new Labour Codes. The programme will be implemented through the Employees State Insurance Corporation ESIC. For workers in hazardous conditions such as handling toxic chemicals or operating heavy machinery check ups are mandatory if illness is detected ESIC hospitals and dispensaries will provide free treatment. India already has a few workers health obligations on paper including under the Factories Act 1948 only within factories the ESI Act 1948 and the Occupational Safety Health and Working Conditions OSH Code 2020. The new programme will be financed through the well endowed ESI fund although the government is still shoring up the number of beds and doctors available via PMJAY empanelled facilities. At this time operational evidence suggests that insured workers will be the main beneficiaries. Commendable though the initiative is its success is not guaranteed. At present only around 31 crore of 94 crore workers are on the e Shram portal whose integration with ESIC is still in its early stages in many States. Labour Minister Mansukh Mandaviya also failed to address how a woman working in a garment home unit or as a domestic worker could access the longer maternity leave if she has no employer. Annual check ups for women also warrant specific medical staff needs whereas many ESIC camps are crowded and dominated by men. As with many of its predecessors the programme does not address the opportunity costs of accessing health care forcing workers to continue contending with lost wages. An ESIC facility may also refer a worker to another centre if it lacks the resources for specific tests leading to repeat visits and added time and cost. The new programme focuses  predominantly  on  non  communicable  diseases  such  as  diabetes  and hypertension. Heat related illnesses are not explicitly recognised as occupational diseases under the ESI Act whereas construction and agriculture workers are most at risk of them. Waste pickers and sanitation workers on the other"
+    },
+    {
+        id: 6534,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 237",
+        passage: "The Tamilaga Vettri Kazhagam TVK and its leader C. Joseph Vijay who was sworn in as Chief Minister along with nine Ministers from the party on Sunday took the shortest and straightest route to power. Falling 10 seats short of the 118 seat majority mark the TVK secured the support of four ideologically aligned parties the Congress five MLAs CPI M CPI and Viduthalai Chiruthaigal Katchi or VCK two each with the IUMLs two MLAs taking the tally to 121. The TVK had soon after its formation sought to position the Congress and the VCK as ideological partners that it has now drawn support from them and the Left and the IUML even though they contested within the Dravida Munnetra Kazhagam led coalition is therefore not out of place. The alternative mooted by AIADMK leaders and endorsed by some DMK leaders an AIADMK government propped up by the DMK would have been an immoral exercise. In any case outgoing Chief Minister M. K. Stalin was against such a farcical twist. Meanwhile by demanding written proof of 118 MLAs support before inviting the TVK the single largest party to form the government Governor Rajendra Arlekar ignored the Sarkaria Commission framework which prioritises the single largest party with outside support next only to a pre poll alliance and the Supreme Courts ruling in Rameshwar Prasad 2006 that only the floor of the House can test a Ministrys strength. The Congress for its part jumped at the offer opportunistically pledging support to the TVK and committing to an alliance for local Assembly and parliamentary elections. That  it  would  so  casually  jeopardise  a  decades  old  alliance  with  the  DMK  is unsurprising. The party contested the 2026 elections half heartedly divided at the top and that ambivalence showed in its returns in the 28 seats it contested it polled just 28 per cent of the vote the second lowest share within the DMK led coalition only the late entrant DMDK did worse. It was also short sighted given that this alliance helped the INDIA bloc win all 39 Lok Sabha seats in Tamil Nadu in 2024. The Left and VCK lent support to the TVK while citing the need for a stable government and reiterating"
+    },
+    {
+        id: 6535,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 238",
+        passage: "The Union Cabinets decision to approve a Bill increasing the Supreme Courts strength from 34 to 38 judges including the Chief Justice of India is a welcome step towards easing the backlog of cases before the apex court. However without structural reforms the judicial hours that the four new judges may contribute could be absorbed by the ever expanding docket. According to the National Judicial Data Grid as of May 7 the Supreme Court is burdened with over 93000 pending cases more than a 50 per cent increase since 2019 when the number of SC judges was last raised. Pendency before the SC accounts for only about 0.14 per cent of total case pendency across all courts. This is negligible compared to around 12 per cent in the high courts and 88 per cent in the district courts. The SC mostly functions at or close to its sanctioned strength. SC judges dispose of roughly 90 per cent of the cases instituted each year. Additional judges or better calendar management may marginally ease the pressure on individual benches but they  cannot  address  the  underlying  reasons  for  mounting  pendency  The  Courts expanding jurisdiction and the volume of litigation generated by the state the countrys biggest litigant. Last year Supreme Court Justice B V Nagarathna underscored this concern. She stressed the need for the government to litigate with restraint and be a model  litigator.  Courts  must  keep  pace  with  the  rising  volume  of  disputes accompanying  population  growth  and  expanding  economic  activity. At the apex court the court of last resort it is especially important to ensure that access to justice is given real meaning prolonged incarceration of undertrials due to delays undermines this right. However given the overwhelming volume of cases in district courts a purely top down approach to reform is unsustainable. Trial courts account for over 4.92 crore pending cases. Successive Law Commission reports have highlighted that Indias judge population ratio at roughly 19 judges per million people remains far below that of countries such as the US and China where the figure is about 150 per million. The move to increase the number of SC"
+    },
+    {
+        id: 6536,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 239",
+        passage: "Backed by a resounding mandate the new Suvendu Adhikari government in West Bengal couldnt be better placed to address the high expectations of poriborton or change. For the first time in nearly 50 years governments in the state and at the Centre are led by the same party. But Chief Minister Adhikari faces tough challenges too. It will be his responsibility to ensure that his government does not slip into the systemic inertias and blind spots that contributed to the downfall of its predecessor the 15 year Trinamool Congress dispensation and before it the 34 year Left rule. Since at least 1977 West Bengal has had a unique form of political culture and competition. The CPI M made the party a parallel state and the state an extension of the party. This smudging of boundaries led to the systematic weakening of governance and accountability on the one hand and normalised political violence on the other. If a citizen doesnt get the ration due to her should she go to the government or a party apparatchik. And if the line is dissolving between the party and the government who checks its members when violence and intimidation become part of the political arsenal. The TMC under Mamata Banerjee did not dismantled these structures only deepened and expanded them. The BJP first and foremost needs to break the 50 year pattern that has eroded trust in the state. There is also a formidable economic challenge staring the new government in the face. For long even as its once thriving industrial base has been hollowed out Bengals young have continued to migrate to other states in search of livelihoods and opportunities cutting across social and economic strata from daily wage earners to college students. It will be the Adhikari governments task to create and expand opportunities at home leverage all the advantages to bring manufacturing and services to the state. Welfare promises in terms of cash transfers and subsidies have their place but they cannot replace  infrastructure  spending  and  employment  generation  the  backbone  of sustainable  growth.  The  2026  election  campaign  was  shadowed  by  the  Election Commissions opaque and flawed"
+    },
+    {
+        id: 6537,
+        lang: 'english',
+        difficulty: 'moderate',
+        title: "StudyPlanner Typing Test 240",
+        passage: "Its that time of the year again when the worlds biggest celebrities spend months preparing for the Met Gala only for the rest of us to sit in our pyjamas at 2 a. m. wondering What is she even wearing. But why are we at Finshots even talking about it. Well because the grand event happened on Monday and being the curious bunch we are we were keen on understanding the economics behind it. And honestly the numbers are even more jaw dropping than the outfits on the red carpet. For the uninitiated the Met Gala began in 1948 as a fundraiser for the newly founded Costume Institute at the Metropolitan Museum of Art in New York. Back then it was basically a dinner event hosted by fashion publicist Eleanor Lambert with tickets priced at just Dollar 50. But today its a completely different beast. A big reason for that transformation is Anna Wintour the former editor in chief of Vogue and one of the most influential people in fashion. Over the years she turned the Met Gala into both a global pop culture moment and a massive revenue machine for Vogue and its parent company Conde Nast which now co organise the event. Every year the gala revolves around a theme. It could focus on a designer a historical era or a broader concept. Guests are expected to dress accordingly and thats what actually sets the stage for some of the most elaborate looks of the year. The theme essentially acts as a creative brief for designers. This years theme for instance explored fashion through the lens of art and the dressing the body across history If you saw Karan Johar and Manish Malhotras looks you may have already gotten a hint Vir Das meme about it probably helped too. Designers then create elaborate outfits around that idea showing off both their creativity and technical skill. Meanwhile the museum gets something equally valuable intellectual credibility that helps maintain the Costume Institutes status as a serious academic institution. And with that status comes money. First through ticket sales. This year a single ticket reportedly cost Dollar 100000 roughly 30 per cent more expensive than last year. And if you wanted a table for 10"
+    }
+];
+
+    // ================================================================
+    // STATE
+    // ================================================================
+    let currentTest = null;
+    let passage = [];
+    let testActive = false;
+    let testFinished = false;
+    let timeLeft = 600;
+    let timerInterval = null;
+    let startTime = null;
+    let endTime = null;
+    let keystrokes = 0;
+
+    const $ = id => document.getElementById(id);
+    const passageEl = $('passageContent');
+    const inputEl = $('userInput');
+
+    // ================================================================
+    // VIEWS
+    // ================================================================
+    function renderTestList(filter) {
+        const grid = $('testGrid');
+        const filtered = filter === 'all' ? ALL_TESTS : ALL_TESTS.filter(t => t.lang === filter);
+        $('testCount').textContent = ALL_TESTS.length;
+        grid.innerHTML = filtered.map(t => `
+            <div class="test-card" onclick="selectTest(${t.id})">
+                <div class="test-name">${t.title}</div>
+                <div class="test-meta">
+                    <span class="tag-${t.lang}">${t.lang === 'english' ? 'English' : 'हिन्दी'}</span>
+                    <span class="tag-${t.difficulty}">${t.difficulty}</span>
+                    <span class="tag-free">Free</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterTests(lang) {
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        renderTestList(lang);
+    }
+
+    function selectTest(id) {
+        currentTest = ALL_TESTS.find(t => t.id === id);
+        if (!currentTest) return;
+        $('testListView').style.display = 'none';
+        $('typingView').style.display = 'block';
+        $('currentTestName').textContent = currentTest.title;
+        initTyping();
+    }
+
+    function backToList() {
+        if (testActive && !confirm('Test in progress! Going back will reset.')) return;
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = null;
+        testActive = false;
+        $('testListView').style.display = 'block';
+        $('typingView').style.display = 'none';
+        $('resultModal').classList.remove('show');
+        renderTestList('all');
+    }
+
+    // ================================================================
+    // TYPING ENGINE
+    // ================================================================
+    function initTyping() {
+        passage = currentTest.passage.trim().split(/\s+/);
+        passageEl.innerHTML = '';
+        passage.forEach((w, i) => {
+            const span = document.createElement('span');
+            span.className = 'word untyped';
+            span.textContent = w + ' ';
+            span.dataset.index = i;
+            passageEl.appendChild(span);
+        });
+        if (passageEl.children.length > 0) passageEl.children[0].className = 'word current';
+
+        $('totalWords').textContent = passage.length;
+        $('passageWordCount').textContent = `${passage.length} words`;
+        $('typedCount').textContent = '0';
+        $('errorCount').textContent = '0';
+        $('charCount').textContent = '0';
+        $('wpmDisplay').textContent = '0';
+        $('accuracyDisplay').textContent = '100';
+        $('timerDisplay').textContent = '10:00';
+        $('progressBar').style.width = '0%';
+        timeLeft = 600;
+        testActive = false;
+        testFinished = false;
+        keystrokes = 0;
+        inputEl.value = '';
+        inputEl.disabled = true;
+        $('startBtn').disabled = false;
+        $('submitBtn').disabled = true;
+        $('errorSummary').className = 'error-box';
+        $('errorSummary').innerHTML = '';
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function startTest() {
+        if (testActive) return;
+        testActive = true;
+        testFinished = false;
+        startTime = Date.now();
+        inputEl.disabled = false;
+        inputEl.value = '';
+        inputEl.focus();
+        $('startBtn').disabled = true;
+        $('submitBtn').disabled = false;
+
+        inputEl.addEventListener('paste', e => { e.preventDefault(); alert('Pasting disabled during test'); });
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            $('timerDisplay').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+            if (timeLeft <= 0) { clearInterval(timerInterval); timerInterval = null; submitTest(); }
+        }, 1000);
+
+        inputEl.addEventListener('input', onType);
+    }
+
+    function onType() {
+        if (!testActive || testFinished) return;
+        const typed = inputEl.value;
+        const words = typed.trim() ? typed.trim().split(/\s+/) : [];
+        $('charCount').textContent = typed.length;
+
+        let correct = 0, errors = 0;
+        const n = s => s.replace(/[.,!?;:'"()\-]/g, '').toLowerCase();
+
+        for (let i = 0; i < passage.length; i++) {
+            const el = passageEl.children[i];
+            if (!el) break;
+            if (i < words.length) {
+                const ok = n(words[i]) === n(passage[i]);
+                if (ok) { el.className = 'word correct'; correct++; }
+                else { el.className = 'word incorrect'; errors++; }
+            } else if (i === words.length && typed.length > 0 && !typed.endsWith(' ')) {
+                el.className = 'word current';
+            } else {
+                el.className = 'word untyped';
+            }
+        }
+
+        $('typedCount').textContent = words.length;
+        $('errorCount').textContent = errors;
+        const total = correct + errors;
+        $('accuracyDisplay').textContent = total > 0 ? Math.round(correct/total*100) : 100;
+
+        if (startTime) {
+            const min = (Date.now() - startTime) / 60000;
+            if (min > 0) $('wpmDisplay').textContent = Math.max(0, Math.round((words.length - errors) / min));
+        }
+        $('progressBar').style.width = Math.min(100, Math.round((words.length / passage.length) * 100)) + '%';
+        const cur = passageEl.querySelector('.word.current');
+        if (cur) cur.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        keystrokes++;
+    }
+
+    function submitTest() {
+        if (!testActive || testFinished) return;
+        testActive = false; testFinished = true;
+        endTime = Date.now();
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        inputEl.disabled = true;
+        $('startBtn').disabled = true;
+        $('submitBtn').disabled = true;
+
+        const words = inputEl.value.trim() ? inputEl.value.trim().split(/\s+/) : [];
+        let correct = 0, errors = 0;
+        const n = s => s.replace(/[.,!?;:'"()\-]/g, '').toLowerCase();
+        const details = [];
+
+        for (let i = 0; i < passage.length; i++) {
+            if (i < words.length) {
+                const ok = n(words[i]) === n(passage[i]);
+                if (ok) correct++;
+                else { errors++; details.push({ typed: words[i], expected: passage[i] }); }
+            }
+        }
+
+        if (errors > 0) {
+            let h = `<strong><i class="fas fa-exclamation-triangle mr-1"></i> ${errors} Error(s):</strong><br>`;
+            details.slice(0, 15).forEach(e => { h += `<span class="err-word">"${e.typed}"</span> → <span class="exp-word">"${e.expected}"</span><br>`; });
+            if (details.length > 15) h += `<em>... and ${details.length - 15} more</em>`;
+            $('errorSummary').innerHTML = h;
+            $('errorSummary').className = 'error-box show has-err';
+        } else {
+            $('errorSummary').innerHTML = '<strong><i class="fas fa-check-circle text-green-600 mr-1"></i> Perfect! Zero errors!</strong>';
+            $('errorSummary').className = 'error-box show no-err';
+        }
+
+        const min = (endTime - startTime) / 60000;
+        const gross = Math.round(words.length / min);
+        const net = Math.max(0, Math.round((words.length - errors) / min));
+        const acc = words.length > 0 ? Math.round((correct / words.length) * 100) : 0;
+        const sec = Math.round((endTime - startTime) / 1000);
+        const ts = `${Math.floor(sec/60)}:${(sec%60).toString().padStart(2,'0')}`;
+
+        $('rWpm').textContent = net;
+        $('rGross').textContent = gross;
+        $('rAcc').textContent = acc + '%';
+        $('rTyped').textContent = words.length;
+        $('rTotal').textContent = passage.length;
+        $('rTime').textContent = ts;
+        $('rErrors').textContent = errors;
+        $('resultModal').classList.add('show');
+    }
+
+    function resetTest() {
+        if (testActive && !confirm('Reset test in progress?')) return;
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        inputEl.removeEventListener('input', onType);
+        $('resultModal').classList.remove('show');
+        initTyping();
+    }
+
+    function closeModal() { $('resultModal').classList.remove('show'); }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => renderTestList('all'));
+    </script>
+</body>
+</html>
